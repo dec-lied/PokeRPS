@@ -20,7 +20,7 @@ git clone https://github.com/dec-lied/PokeRPS.git
 
 <h1> How to play </h1>
 <ul>
-  <li> The game will start at the intro screen where you can either start playing or go to the main menu. </li>
+  <li> The game will start at the intro screen where you can either see the tutorial or go to the main menu. </li>
   <li> If you do not know how the pokémon type system works, either click tutorial in the game or read below:
   </li>   
   <li> <ins> Fire beats Grass, Grass beats Water, and Water beats Fire. </ins> </li>
