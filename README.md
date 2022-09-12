@@ -36,3 +36,9 @@ git clone https://github.com/dec-lied/PokeRPS.git
 </ul>
 
 <h1> Screenshots of the game </h1>
+
+![menu](https://user-images.githubusercontent.com/103293120/189689799-80c1ebe1-c6c9-4c80-97e8-d102d0c6afc9.jpg)
+
+![battle](https://user-images.githubusercontent.com/103293120/189689831-eb284e2d-59e1-46a2-9e2c-f229fb378dc5.jpg)
+
+![tutorial](https://user-images.githubusercontent.com/103293120/189689887-cf55aa4f-64e7-4ee6-97d4-1108356473d8.jpg)
