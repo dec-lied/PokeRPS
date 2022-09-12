@@ -1,5 +1,5 @@
 # PokeRPS
-<p> 9/12/22 CAS Reflection 8 - PokeRPS (Poke Rock Paper Scissors) </p>
+<p> 9/12/22 CAS Reflection 8 - PokeRPS (Poké Rock Paper Scissors) </p>
 
 <h1> How to download and execute </h1>
   <p> <b> Note about source code: </b> the dlls are not included in the /pokeRPS folder due to them being architecture dependant. If you want to run the source code yourself, drag the respective dlls from the /standalone/dlls folder into the /pokeRPS folder where main.cpp resides </p>
@@ -21,7 +21,7 @@ git clone https://github.com/dec-lied/PokeRPS.git
 <h1> How to play </h1>
 <ul>
   <li> The game will start at the intro screen where you can either start playing or go to the main menu. </li>
-  <li> If you do not know how the pokemon type system works, either click tutorial in the game or read below:
+  <li> If you do not know how the pokémon type system works, either click tutorial in the game or read below:
   </li>   
   <li> <ins> Fire beats Grass, Grass beats Water, and Water beats Fire. </ins> </li>
   <li> It goes in a circle, just like rock paper scissors! </li>
