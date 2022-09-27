@@ -15,19 +15,21 @@ class ScrollText : public Text
 private:
 	// internal
 	float anchorTime;
-	float scrollSpeed;
 	unsigned charCount;
 	std::string scrollText;
 	const std::string rootText;
 
 public:
+	// static members
+	static float scrollSpeed;
+
 	// universal members
 	std::vector<scrollUpdate> updateQueue;
 
 	unsigned phase;
 	bool inf = false;
 
-	ScrollText(std::string text, float centerX, float centerY, float scaleX, float scaleY, glm::vec4 textColor, float scrollSpeed, std::vector<scrollUpdate> updateQueue);
+	ScrollText(std::string text, float centerX, float centerY, float scaleX, float scaleY, glm::vec4 textColor, std::vector<scrollUpdate> updateQueue);
 	~ScrollText();
 
 	// universal methods
@@ -40,7 +42,7 @@ public:
 	// update queue methods
 	// adds update to the updateQueue
 	void pushUpdate(scrollUpdate update);
-	
+
 	// commits update and dequeues it from the updateQueue
 	void dequeueUpdate();
 

@@ -147,12 +147,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RPS.cpp" />
     <ClCompile Include="ScrollText.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -161,10 +163,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="RPS.h" />
     <ClInclude Include="ScrollText.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Sprite.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="UIElement.h" />
@@ -183,6 +187,7 @@
     <Media Include="audio\flick2.mp3" />
     <Media Include="audio\pokeAbutton.mp3" />
     <Media Include="audio\pokebattle.mp3" />
+    <Media Include="audio\pokebump.mp3" />
     <Media Include="audio\pokecerulian.mp3" />
     <Media Include="audio\pokeopening.mp3" />
   </ItemGroup>

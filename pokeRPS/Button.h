@@ -20,8 +20,7 @@ private:
 	ButtonType buttonType;
 
 	// text based button members
-	Text* text = nullptr;
-	float xMargin, yMargin;
+	float lMargin, rMargin, uMargin, dMargin;
 
 	// border button members
 	float borderWidth;
@@ -29,10 +28,12 @@ private:
 
 public:
 	// static members & methods
-	static glm::mat4 projection;
 	static std::unique_ptr<Shader> buttonShader;
 	static void init();
 	static void cleanup();
+
+	// text based button members
+	Text* text = nullptr;
 
 	// universal members
 	void(*func)();
@@ -42,8 +43,8 @@ public:
 
 	Button(float x, float y, float width, float height, glm::vec4 bgColor, glm::vec4 hoverColor, void(*func)());
 	Button(float x, float y, float width, float height, float borderWidth, glm::vec4 bgColor, glm::vec4 hoverColor, glm::vec4 borderColor, void(*func)());
-	Button(Text* text, float xMargin, float yMargin, glm::vec4 bgColor, glm::vec4 hoverColor, void(*func)());
-	Button(Text* text, float xMargin, float yMargin, float borderWidth, glm::vec4 bgColor, glm::vec4 hoverColor, glm::vec4 borderColor, void(*func)());
+	Button(Text* text, float lMargin, float rMargin, float uMargin, float dMargin, glm::vec4 bgColor, glm::vec4 hoverColor, void(*func)());
+	Button(Text* text, float lMargin, float rMargin, float uMargin, float dMargin, float borderWidth, glm::vec4 bgColor, glm::vec4 hoverColor, glm::vec4 borderColor, void(*func)());
 	~Button();
 
 	// universal methods

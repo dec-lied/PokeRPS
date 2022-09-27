@@ -1,8 +1,5 @@
 #include "RPS.h"
 
-#include "Text.h"
-#include "Image.h"
-#include "Button.h"
 #include "UIManager.h"
 
 unsigned WINDOWWIDTH, WINDOWHEIGHT;
@@ -18,6 +15,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 	WINDOWWIDTH = width;
 	WINDOWHEIGHT = height;
+	UIElement::projection = glm::ortho(0.0f, (float)*UIElement::WINDOWWIDTH, 0.0f, (float)*UIElement::WINDOWHEIGHT);
 
 	Yui::updateAll();
 
@@ -124,11 +122,14 @@ int main()
 
 	UIElement::WINDOWWIDTH = &WINDOWWIDTH;
 	UIElement::WINDOWHEIGHT = &WINDOWHEIGHT;
+	UIElement::projection = glm::ortho(0.0f, (float)*UIElement::WINDOWWIDTH, 0.0f, (float)*UIElement::WINDOWHEIGHT);
+
+	ScrollText::scrollSpeed = Yui::config.scrollSpeed;
 
 	Text::init("fonts/pokefont.ttf",  &ratioW, &ratioH, 32);
 	Image::init();
 	Button::init();
-
+	
 	Yui::initSound();
 	Yui::UIElements.reserve(10);
 	Yui::loadScene(0);
@@ -141,7 +142,7 @@ int main()
 		prevTime = currTime;
 
 		// background
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(Yui::config.bgColor[0], Yui::config.bgColor[1], Yui::config.bgColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		processInput(window);
@@ -165,24 +166,24 @@ int main()
 
 			break;
 
-		case 2: // maim menu
+		case 2: // main menu
 		{
-			Image* squirtle = (Image*)Yui::UIElements[0];
-			Image* bulbasaur = (Image*)Yui::UIElements[1];
-			Image* charmander = (Image*)Yui::UIElements[2];
+			Sprite* squirtle = (Sprite*)Yui::UIElements[0];
+			Sprite* bulbasaur = (Sprite*)Yui::UIElements[1];
+			Sprite* charmander = (Sprite*)Yui::UIElements[2];
 
 			if (squirtle->centerY + squirtle->translation[1] < 1.15f)
-				squirtle->applyTranslation(0.115f * deltaTime, 0.115f * deltaTime);
+				squirtle->appendTranslation(glm::vec2(0.115f * deltaTime, 0.115f * deltaTime));
 			else
 				squirtle->translation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			if (bulbasaur->centerX + bulbasaur->translation[0] < 1.15f)
-				bulbasaur->applyTranslation(0.1f * deltaTime, -0.0175f * deltaTime);
+				bulbasaur->appendTranslation(glm::vec2(0.1f * deltaTime, -0.0175f * deltaTime));
 			else
 				bulbasaur->translation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			if (charmander->centerY + charmander->translation[1] > -0.15f)
-				charmander->applyTranslation(-0.025f * deltaTime, -0.1f * deltaTime);
+				charmander->appendTranslation(glm::vec2(-0.025f * deltaTime, -0.1f * deltaTime));
 			else
 				charmander->translation = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -193,14 +194,14 @@ int main()
 		{
 			ScrollText* txt = ((ScrollText*)Yui::UIElements[3]);
 
-			if (txt->phase == 0)
+			if (txt->phase == 0 && txt->elapsed() <= 3.4f)
 			{
-				((Image*)Yui::UIElements[0])->applyTranslation(-0.255f * deltaTime, 0.0f);
-				((Image*)Yui::UIElements[1])->applyTranslation(0.255f * deltaTime, 0.0f);
+				((Sprite*)Yui::UIElements[0])->appendTranslation(glm::vec2((-0.2f * deltaTime) * (1.0f + (ScrollText::scrollSpeed / 38.0f)), 0.0f));
+				((Sprite*)Yui::UIElements[1])->appendTranslation(glm::vec2((0.2f  * deltaTime) * (1.0f + (ScrollText::scrollSpeed / 38.0f)), 0.0f));
 			}
 			else if (txt->phase == 1)
 			{
-				if (txt->elapsed() > 2.4f)
+				if (txt->elapsed() > (30.0f / ScrollText::scrollSpeed))
 				{
 					Yui::UIElements[4]->visible = true;
 					Yui::UIElements[5]->visible = true;
@@ -216,6 +217,12 @@ int main()
 			}
 			else if (txt->phase == 3 && txt->elapsed() > 4.33f)
 				Yui::loadScene(2);
+
+			break;
+		}
+
+		case 4: // settings
+		{
 
 			break;
 		}

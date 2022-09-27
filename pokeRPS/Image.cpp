@@ -1,24 +1,21 @@
 #include "Image.h"
 
-glm::mat4 Image::projection;
 std::unique_ptr<Shader> Image::imageShader;
 
 Image::Image(std::string imgPath, bool alpha, float centerX, float centerY, float width, float height)
 	: imgPath(imgPath)
 	, texture(imgPath.c_str(), alpha)
-	, viewMatrix(glm::mat4(1.0f))
-	, translation(glm::vec3(0.0f, 0.0f, 0.0f))
 	, UIElement(centerX, centerY, width, height)
 {
 	GLfloat vertices[]
 	{
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT),		0.0f, 1.0f, // tl
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT),		0.0f, 0.0f, // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT),		1.0f, 1.0f, // tr
-
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT),		0.0f, 0.0f, // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT),		1.0f, 0.0f, // br
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT),		1.0f, 1.0f  // tr
+		(this->centerX - (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY + (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		0.0f, 1.0f, // tl
+		(this->centerX - (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY - (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		0.0f, 0.0f, // bl
+		(this->centerX + (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY + (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		1.0f, 1.0f, // tr
+																		
+		(this->centerX - (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY - (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		0.0f, 0.0f, // bl
+		(this->centerX + (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY - (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		1.0f, 0.0f, // br
+		(this->centerX + (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY + (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		1.0f, 1.0f  // tr
 	};
 
 	glGenVertexArrays(1, &this->VAO);
@@ -48,7 +45,7 @@ Image::~Image()
 
 void Image::init()
 {
-	Image::projection = glm::ortho(0.0f, (float)(*UIElement::WINDOWWIDTH), 0.0f, (float)(*UIElement::WINDOWHEIGHT));
+	UIElement::projection = glm::ortho(0.0f, (float)(*UIElement::WINDOWWIDTH), 0.0f, (float)(*UIElement::WINDOWHEIGHT));
 	Image::imageShader = std::unique_ptr<Shader>(new Shader("shaders/image.vert", "shaders/image.frag", true));
 }
 
@@ -64,28 +61,18 @@ void Image::changeTexture(std::string imgPath, bool alpha)
 	this->texture.replaceTexture(this->imgPath.c_str(), alpha);
 }
 
-void Image::applyTranslation(float deltaX, float deltaY)
-{
-	this->translation[0] += deltaX;
-	this->translation[1] += deltaY;
-
-	this->update();
-}
-
 void Image::update()
 {
 	GLfloat vertices[]
 	{
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (this->translation[0] * *UIElement::WINDOWWIDTH), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (this->translation[1] * *UIElement::WINDOWHEIGHT),		0.0f, 1.0f, // tl
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (this->translation[0] * *UIElement::WINDOWWIDTH), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (this->translation[1] * *UIElement::WINDOWHEIGHT),		0.0f, 0.0f, // bl
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (this->translation[0] * *UIElement::WINDOWWIDTH), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (this->translation[1] * *UIElement::WINDOWHEIGHT),		1.0f, 1.0f, // tr
-
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (this->translation[0] * *UIElement::WINDOWWIDTH), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (this->translation[1] * *UIElement::WINDOWHEIGHT),		0.0f, 0.0f, // bl
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (this->translation[0] * *UIElement::WINDOWWIDTH), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (this->translation[1] * *UIElement::WINDOWHEIGHT),		1.0f, 0.0f, // br
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (this->translation[0] * *UIElement::WINDOWWIDTH), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (this->translation[1] * *UIElement::WINDOWHEIGHT),		1.0f, 1.0f  // tr
+		(this->centerX - (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY + (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		0.0f, 1.0f, // tl
+		(this->centerX - (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY - (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		0.0f, 0.0f, // bl
+		(this->centerX + (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY + (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		1.0f, 1.0f, // tr
+																		
+		(this->centerX - (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY - (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		0.0f, 0.0f, // bl
+		(this->centerX + (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY - (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		1.0f, 0.0f, // br
+		(this->centerX + (this->width / 2.0f)) * *UIElement::WINDOWWIDTH, (this->centerY + (this->height / 2.0f)) * *UIElement::WINDOWHEIGHT,		1.0f, 1.0f  // tr
 	};
-
-	Image::projection = glm::ortho(0.0f, (float)(*UIElement::WINDOWWIDTH), 0.0f, (float)(*UIElement::WINDOWHEIGHT));
 
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
@@ -98,7 +85,7 @@ void Image::render()
 		return;
 
 	Image::imageShader->use();
-	Image::imageShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(Image::projection));
+	Image::imageShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(UIElement::projection));
 
 	glBindVertexArray(this->VAO);
 	this->texture.bindTexture();

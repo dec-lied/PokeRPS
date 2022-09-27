@@ -5,10 +5,9 @@
 
 #include "RPS.h"
 #include "Shader.h"
-
-#include "Text.h"
-#include "Image.h"
+#include "Sprite.h"
 #include "Button.h"
+#include "Config.h"
 #include "ScrollText.h"
 
 class Yui
@@ -30,6 +29,9 @@ public:
 	static irrklang::ISound* bgm;
 
 	static void initSound();
+
+	// config member
+	static Config config;
 
 	// animation-related members
 	static bool toClose;

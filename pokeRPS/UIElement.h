@@ -12,6 +12,7 @@ class UIElement
 public:
 	// static members
 	static unsigned* WINDOWWIDTH, * WINDOWHEIGHT;
+	static glm::mat4 projection;
 
 	// universal members
 	float centerX, centerY, width, height;

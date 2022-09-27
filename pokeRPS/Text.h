@@ -30,7 +30,6 @@ public:
 	static FT_Face face;
 
 	// rendering-related members
-	static glm::mat4 projection;
 	static std::unique_ptr<Shader> textShader;
 
 	// internal

@@ -7,7 +7,6 @@ GLuint Text::VAO, Text::VBO;
 FT_Library Text::ftlib;
 FT_Face Text::face;
 
-glm::mat4 Text::projection;
 unsigned Text::pixelHeight;
 
 float* Text::ratioW, *Text::ratioH;
@@ -67,7 +66,7 @@ void Text::init(const char* fontName, float* ratioW, float* ratioH, unsigned pix
 	Text::ratioW = ratioW;
 	Text::ratioH = ratioH;
 
-	Text::projection = glm::ortho(0.0f, (float)(*UIElement::WINDOWWIDTH), 0.0f, (float)(*UIElement::WINDOWHEIGHT));
+	UIElement::projection = glm::ortho(0.0f, (float)(*UIElement::WINDOWWIDTH), 0.0f, (float)(*UIElement::WINDOWHEIGHT));
 	Text::textShader = std::unique_ptr<Shader>(new Shader("shaders/text.vert", "shaders/text.frag", true));
 
 	Text::pixelHeight = pixelHeight;
@@ -150,8 +149,6 @@ void Text::cleanup()
 
 void Text::update()
 {
-	Text::projection = glm::ortho(0.0f, (float)*UIElement::WINDOWWIDTH, 0.0f, (float)*UIElement::WINDOWHEIGHT);
-
 	this->width = 0.0f;
 	for (std::string::const_iterator c = this->text.begin(); c != this->text.end(); c++)
 	{
@@ -181,7 +178,7 @@ void Text::render()
 
 	Text::textShader->use();
 	Text::textShader->set4fv("textColor", 1, glm::value_ptr(this->textColor));
-	Text::textShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(Text::projection));
+	Text::textShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(UIElement::projection));
 
 	glActiveTexture(GL_TEXTURE0);
 

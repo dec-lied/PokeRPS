@@ -1,6 +1,5 @@
 #include "Button.h"
 
-glm::mat4 Button::projection;
 std::unique_ptr<Shader> Button::buttonShader = nullptr;
 
 Button::Button(float x, float y, float width, float height, glm::vec4 bgColor, glm::vec4 hoverColor, void(*func)())
@@ -10,20 +9,33 @@ Button::Button(float x, float y, float width, float height, glm::vec4 bgColor, g
 	, func(func)
 	, borderColor(glm::vec4(0.0f))
 	, borderWidth(0.0f)
-	, xMargin(0.0f)
-	, yMargin(0.0f)
+	, lMargin(0.0f)
+	, rMargin(0.0f)
+	, uMargin(0.0f)
+	, dMargin(0.0f)
 {
 	this->buttonType = ButtonType::BLANK;
 
-	GLfloat vertices[]
+	GLfloat vertices[12]
 	{
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
- 
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)  // tr
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT  // t
 	};
 
 	glGenVertexArrays(1, &this->VAO);
@@ -48,28 +60,54 @@ Button::Button(float x, float y, float width, float height, float borderWidth, g
 	, hoverColor(hoverColor)
 	, borderColor(borderColor)
 	, func(func)
-	, xMargin(0.0f)
-	, yMargin(0.0f)
+	, lMargin(0.0f)
+	, rMargin(0.0f)
+	, uMargin(0.0f)
+	, dMargin(0.0f)
 {
 	this->buttonType = ButtonType::BLANK_BORDER;
 
-	GLfloat vertices[]
+	GLfloat vertices[24]
 	{
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
-																					   
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
 
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tl
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tr
-																																				   
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // br
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth)  // tr
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, // t		
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, // t				
+
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT // t		
 	};
 
 	glGenVertexArrays(1, &this->VAO);
@@ -87,17 +125,19 @@ Button::Button(float x, float y, float width, float height, float borderWidth, g
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-Button::Button(Text* text, float xMargin, float yMargin, glm::vec4 bgColor, glm::vec4 hoverColor, void(*func)())
+Button::Button(Text* text, float lMargin, float rMargin, float uMargin, float dMargin, glm::vec4 bgColor, glm::vec4 hoverColor, void(*func)())
 	: UIElement
 	(
-		text->centerX, 
-		text->centerY, 
-		(text->width / *UIElement::WINDOWWIDTH) + ((text->width / *UIElement::WINDOWWIDTH) * xMargin), 
-		(text->height / *UIElement::WINDOWHEIGHT) + ((text->height / *UIElement::WINDOWHEIGHT) * yMargin)
+		text->centerX,
+		text->centerY,
+		text->width / *UIElement::WINDOWWIDTH,
+		text->height / *UIElement::WINDOWHEIGHT
 	)
 	, text(text)
-	, xMargin(xMargin)
-	, yMargin(yMargin)
+	, lMargin(lMargin)
+	, rMargin(rMargin)
+	, uMargin(uMargin)
+	, dMargin(dMargin)
 	, bgColor(bgColor)
 	, hoverColor(hoverColor)
 	, func(func)
@@ -106,15 +146,26 @@ Button::Button(Text* text, float xMargin, float yMargin, glm::vec4 bgColor, glm:
 {
 	this->buttonType = ButtonType::TEXT;
 
-	GLfloat vertices[]
+	GLfloat vertices[12]
 	{
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
 
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)  // tr
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT  // t
 	};
 
 	glGenVertexArrays(1, &this->VAO);
@@ -132,17 +183,19 @@ Button::Button(Text* text, float xMargin, float yMargin, glm::vec4 bgColor, glm:
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-Button::Button(Text* text, float xMargin, float yMargin, float borderWidth, glm::vec4 bgColor, glm::vec4 hoverColor, glm::vec4 borderColor, void(*func)())
+Button::Button(Text* text, float lMargin, float rMargin, float uMargin, float dMargin, float borderWidth, glm::vec4 bgColor, glm::vec4 hoverColor, glm::vec4 borderColor, void(*func)())
 	: UIElement
 	(
 		text->centerX,
 		text->centerY,
-		(text->width / *UIElement::WINDOWWIDTH) + ((text->width / *UIElement::WINDOWWIDTH) * (xMargin * *text->ratioW)),
-		(text->height / *UIElement::WINDOWHEIGHT) + ((text->height / *UIElement::WINDOWHEIGHT) * (yMargin * *text->ratioH))
+		text->width / *UIElement::WINDOWWIDTH,
+		text->height / *UIElement::WINDOWHEIGHT
 	)
 	, text(text)
-	, xMargin(xMargin)
-	, yMargin(yMargin)
+	, lMargin(lMargin)
+	, rMargin(rMargin)
+	, uMargin(uMargin)
+	, dMargin(dMargin)
 	, borderWidth(borderWidth)
 	, bgColor(bgColor)
 	, hoverColor(hoverColor)
@@ -151,23 +204,47 @@ Button::Button(Text* text, float xMargin, float yMargin, float borderWidth, glm:
 {
 	this->buttonType = ButtonType::TEXT_BORDER;
 
-	GLfloat vertices[]
+	GLfloat vertices[24]
 	{
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
 
-		(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-		(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
 
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tl
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tr
-																																				   
-		((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // br
-		((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth)  // tr
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, // t		
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, // t				
+
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT // t		
 	};
 
 	glGenVertexArrays(1, &this->VAO);
@@ -196,7 +273,6 @@ Button::~Button()
 
 void Button::init()
 {
-	Button::projection = glm::ortho(0.0f, (float)(*UIElement::WINDOWWIDTH), 0.0f, (float)(*UIElement::WINDOWHEIGHT));
 	Button::buttonShader = std::unique_ptr<Shader>(new Shader("shaders/button.vert", "shaders/button.frag", true));
 }
 
@@ -210,10 +286,10 @@ bool Button::isHovering(float mouseX, float mouseY)
 	if (!this->visible)
 		return false;
 
-	if (mouseX > (this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH) &&
-		mouseX < (this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH) &&
-		(*UIElement::WINDOWHEIGHT - mouseY) >(this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT) &&
-		(*UIElement::WINDOWHEIGHT - mouseY) < (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT))
+	if (mouseX > (((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f) * this->lMargin)))) * *UIElement::WINDOWWIDTH &&
+		mouseX < (((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f) * this->rMargin)))) * *UIElement::WINDOWWIDTH &&
+		(*UIElement::WINDOWHEIGHT - mouseY) >(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f) * this->dMargin)))) * *UIElement::WINDOWHEIGHT &&
+		(*UIElement::WINDOWHEIGHT - mouseY) < (((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f) * this->uMargin)))) * *UIElement::WINDOWHEIGHT)
 	{
 		this->hovering = true;
 		return true;
@@ -228,114 +304,60 @@ bool Button::isHovering(float mouseX, float mouseY)
 
 void Button::update()
 {
-	Button::projection = glm::ortho(0.0f, (float)*UIElement::WINDOWWIDTH, 0.0f, (float)*UIElement::WINDOWHEIGHT);
-
-	switch (this->buttonType)
+	if (this->text)
 	{
-		case ButtonType::BLANK:
-		{
-			GLfloat vertices[]
-			{
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
+		this->text->update();
 
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)  // tr
-			};
-
-			glBindVertexArray(this->VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-			break;
-		}
-
-		case ButtonType::BLANK_BORDER:
-		{
-			GLfloat vertices[]
-			{
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
-
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
-
-				((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tl
-				((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-				((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tr
-
-				((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-				((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // br
-				((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth)  // tr
-			};
-
-			glBindVertexArray(this->VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-			break;
-		}
-
-		case ButtonType::TEXT:
-		{
-			this->text->update();
-
-			this->width = (text->width / *UIElement::WINDOWWIDTH) + ((text->width / *UIElement::WINDOWWIDTH) * xMargin);
-			this->height = (text->height / *UIElement::WINDOWHEIGHT) + ((text->height / *UIElement::WINDOWHEIGHT) * (yMargin * *text->ratioH));
-
-			GLfloat vertices[]
-			{
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
-
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)  // tr
-			};
-
-			glBindVertexArray(this->VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-
-			break;
-		}
-
-		case ButtonType::TEXT_BORDER:
-		{
-			this->text->update();
-
-			this->width = (text->width / *UIElement::WINDOWWIDTH) + ((text->width / *UIElement::WINDOWWIDTH) * xMargin);
-			this->height = (text->height / *UIElement::WINDOWHEIGHT) + ((text->height / *UIElement::WINDOWHEIGHT) * (yMargin * *text->ratioH));
-
-			GLfloat vertices[]
-			{
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tl
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
-
-				(this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // bl
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // br
-				(this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH), (this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT), // tr
-
-				((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tl
-				((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-				((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // tr
-
-				((this->centerX * *UIElement::WINDOWWIDTH) - ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // bl
-				((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) - ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) - (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), // br
-				((this->centerX * *UIElement::WINDOWWIDTH) + ((this->width / 2.0f) * *UIElement::WINDOWWIDTH)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth), ((this->centerY * *UIElement::WINDOWHEIGHT) + ((this->height / 2.0f) * *UIElement::WINDOWHEIGHT)) + (((this->width / 2.0f) * *UIElement::WINDOWWIDTH) * this->borderWidth)  // tr
-			};
-
-			glBindVertexArray(this->VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-
-			break;
-		}
+		this->width = text->width / *UIElement::WINDOWWIDTH;
+		this->height = text->height / *UIElement::WINDOWHEIGHT;
 	}
+
+	GLfloat vertices[24]
+	{
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+		((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) * *UIElement::WINDOWWIDTH, // l
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) * *UIElement::WINDOWHEIGHT, // b
+
+		((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) * *UIElement::WINDOWWIDTH, // r
+			((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) * *UIElement::WINDOWHEIGHT, // t
+
+
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, // t		
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, // t				
+
+
+		(((this->centerX - (this->width / 2.0f)) - ((this->width / 2.0f) * this->lMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // l
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY - (this->height / 2.0f)) - ((this->height / 2.0f) * this->dMargin)) - (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT, //  b  		
+
+		(((this->centerX + (this->width / 2.0f)) + ((this->width / 2.0f) * this->rMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWWIDTH, // r
+			(((this->centerY + (this->height / 2.0f)) + ((this->height / 2.0f) * this->uMargin)) + (this->borderWidth * ((this->height / 2.0f) + ((this->height / 2.0f))))) * *UIElement::WINDOWHEIGHT // t		
+	};
+
+	glBindVertexArray(this->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 }
 
 void Button::render()
@@ -344,65 +366,42 @@ void Button::render()
 		return;
 
 	Button::buttonShader->use();
-	Button::buttonShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(Button::projection));
+	Button::buttonShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(UIElement::projection));
 
 	switch (this->buttonType)
 	{
-		case ButtonType::BLANK:
-			if (this->hovering)
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->hoverColor));
-			else
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->bgColor));
+	case ButtonType::BLANK:
+	case ButtonType::TEXT:
+		if (this->hovering)
+			Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->hoverColor));
+		else
+			Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->bgColor));
 
-			glBindVertexArray(this->VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			break;
+		glBindVertexArray(this->VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		break;
 
-		case ButtonType::BLANK_BORDER:
-			Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->borderColor));
-			glBindVertexArray(this->VAO);
-			glDrawArrays(GL_TRIANGLES, 6, 6);
+	case ButtonType::BLANK_BORDER:
+	case ButtonType::TEXT_BORDER:
+		Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->borderColor));
+		glBindVertexArray(this->VAO);
+		glDrawArrays(GL_TRIANGLES, 6, 6);
 
-			if (this->hovering)
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->hoverColor));
-			else
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->bgColor));
+		if (this->hovering)
+			Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->hoverColor));
+		else
+			Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->bgColor));
 
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			break;
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		break;
 
-		case ButtonType::TEXT:
-			if (this->hovering)
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->hoverColor));
-			else
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->bgColor));
-
-			glBindVertexArray(this->VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			
-			this->text->render();
-			break;
-
-		case ButtonType::TEXT_BORDER:
-			Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->borderColor));
-			glBindVertexArray(this->VAO);
-			glDrawArrays(GL_TRIANGLES, 6, 6);
-
-			if (this->hovering)
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->hoverColor));
-			else
-				Button::buttonShader->set4fv("color", 1, glm::value_ptr(this->bgColor));
-
-			glBindVertexArray(this->VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-
-			this->text->render();
-			break;
-
-		default:
+	default:
 #ifdef _DEBUG
-			std::cout << "failed to recognize button type" << std::endl;
+		std::cout << "failed to recognize button type" << std::endl;
 #endif
-			break;
+		break;
 	}
+
+	if (this->text)
+		this->text->render();
 }

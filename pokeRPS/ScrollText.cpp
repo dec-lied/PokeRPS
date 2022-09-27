@@ -1,10 +1,11 @@
 #include "ScrollText.h"
 
-ScrollText::ScrollText(std::string text, float centerX, float centerY, float scaleX, float scaleY, glm::vec4 textColor, float scrollSpeed, std::vector<scrollUpdate> updateQueue)
+float ScrollText::scrollSpeed;
+
+ScrollText::ScrollText(std::string text, float centerX, float centerY, float scaleX, float scaleY, glm::vec4 textColor, std::vector<scrollUpdate> updateQueue)
 	: Text(text, centerX, centerY, scaleX, scaleY, textColor)
 	, scrollText("")
 	, rootText(text)
-	, scrollSpeed(scrollSpeed)
 	, anchorTime((float)glfwGetTime())
 	, charCount(0)
 	, updateQueue(updateQueue)
@@ -37,8 +38,11 @@ void ScrollText::pushUpdate(scrollUpdate update)
 
 void ScrollText::dequeueUpdate()
 {
-	if (this->updateQueue.size() > 0 && this->elapsed() >= this->updateQueue[0].timeReq)
+	if (this->updateQueue.size() > 0 && this->elapsed() >= this->updateQueue[0].timeReq + (strlen(this->text.c_str()) / ScrollText::scrollSpeed))
 	{
+#ifdef _DEBUG
+		std::cout << "changing text from \"" << this->text << "\" to \"" << this->updateQueue[0].newText << "\"" << std::endl;
+#endif
 		this->phase++;
 		this->text = this->updateQueue[0].newText;
 
@@ -47,12 +51,15 @@ void ScrollText::dequeueUpdate()
 
 		this->anchor();
 	}
+#ifdef _DEBUG
+	else
+		if (this->updateQueue.size() > 0 && ::fmod(this->elapsed(), 1.0f) < 0.0125f)
+			std::cout << this->text << ":\t" << this->elapsed() << "/" << this->updateQueue[0].timeReq + (strlen(this->text.c_str()) / ScrollText::scrollSpeed) << std::endl;
+#endif
 }
 
 void ScrollText::update()
 {
-	Text::projection = glm::ortho(0.0f, (float)*UIElement::WINDOWWIDTH, 0.0f, (float)*UIElement::WINDOWHEIGHT);
-
 	this->width = 0.0f;
 	for (std::string::const_iterator c = this->rootText.begin(); c != this->rootText.end(); c++)
 	{
@@ -76,27 +83,25 @@ void ScrollText::render()
 		return;
 
 	this->dequeueUpdate();
-	            
-	this->realX = (this->centerX * *UIElement::WINDOWWIDTH) - (this->width / 2.0f);
-	this->realY = (this->centerY * *UIElement::WINDOWHEIGHT) - (this->height / 2.0f);
+
+	if (this->charCount < this->text.size())
+	{
+		this->charCount = (unsigned)(this->elapsed() * ScrollText::scrollSpeed);
+		this->scrollText = this->text.substr(0, this->charCount);
+	}
+	else if (this->scrollText.size() != this->text.size())
+		this->scrollText = this->text;
 
 	glBindVertexArray(Text::VAO);
 
 	Text::textShader->use();
-	Text::textShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(Text::projection));
+	Text::textShader->setMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(UIElement::projection));
 	Text::textShader->set4fv("textColor", 1, glm::value_ptr(this->textColor));
 
 	glActiveTexture(GL_TEXTURE0);
 
-	if (this->charCount < this->text.size())
-	{
-		this->charCount = (unsigned)(this->elapsed() * this->scrollSpeed);
-		this->scrollText = this->text.substr(0, this->charCount);
-	}
-	else if (this->scrollText.size() != this->text.size())
-	{
-		this->scrollText = this->text;
-	}
+	this->realX = (this->centerX * *UIElement::WINDOWWIDTH) - (this->width / 2.0f);
+	this->realY = (this->centerY * *UIElement::WINDOWHEIGHT) - (this->height / 2.0f);
 
 	for (std::string::const_iterator c = this->scrollText.begin(); c != this->scrollText.end(); c++)
 	{
@@ -108,7 +113,7 @@ void ScrollText::render()
 		float w = ch.Size.x * (scaleX * *Text::ratioW);
 		float h = ch.Size.y * (scaleY * *Text::ratioH);
 
-		float vertices[6][4]
+		GLfloat vertices[6][4]
 		{
 			{ xpos,     ypos + h,   0.0f, 0.0f },
 			{ xpos,     ypos,       0.0f, 1.0f },
